@@ -11,12 +11,11 @@ export class Producto extends AbstractEntity {
   precio: number;
 
   @Column('int')
-  stock: number; // Vital para el inventario
+  stock: number; 
 
   @Column({ type: 'text', nullable: true })
   fotoUrl: string; // URL de la imagen (Web o Local)
 
-  // Relación: Muchos productos pertenecen a una Categoría
   @ManyToOne(() => Categoria, (categoria) => categoria.productos)
   categoria: Categoria;
 }

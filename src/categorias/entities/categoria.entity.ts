@@ -5,7 +5,7 @@ import { Producto } from '../../productos/entities/producto.entity';
 @Entity('categorias')
 export class Categoria extends AbstractEntity {
   @Column({ unique: true })
-  nombre: string; // Ej: "Tortas" O "Pokémon Eléctrico"
+  nombre: string;
 
   @Column({ nullable: true })
   descripcion: string;

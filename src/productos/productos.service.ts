@@ -13,7 +13,7 @@ export class ProductosService {
     @InjectRepository(Categoria) private readonly categoriaRepo: Repository<Categoria>,
   ) {}
 
-  // 1. CREATE: Crear producto validando categoría
+  //Crear producto validando categoría
   async create(dto: CreateProductoDto) {
     // Verificamos que la categoría exista
     const categoria = await this.categoriaRepo.findOneBy({ id: dto.categoriaId });
@@ -21,20 +21,20 @@ export class ProductosService {
 
     const producto = this.productoRepo.create({
       ...dto,
-      categoria, // Asociamos la relación
+      categoria, 
     });
     
     return await this.productoRepo.save(producto);
   }
 
-  // 2. READ ALL: Listar todos (con su categoría visible)
+  //Listar todos (con su categoría visible)
   async findAll() {
     return await this.productoRepo.find({
       relations: ['categoria'], // Truco para que te traiga el nombre de la categoría
     });
   }
 
-  // 3. READ ONE: Buscar uno solo por ID
+  //Buscar uno solo por ID
   async findOne(id: number) {
     const producto = await this.productoRepo.findOne({
       where: { id },
@@ -44,24 +44,24 @@ export class ProductosService {
     return producto;
   }
 
-  // 4. UPDATE: Editar datos
+  // 4.Editar datos
   async update(id: number, dto: UpdateProductoDto) {
-    const producto = await this.findOne(id); // Reutilizamos el buscar
+    const producto = await this.findOne(id); 
     
-    // Si quieren cambiar la categoría, la buscamos de nuevo
+
     if (dto.categoriaId) {
       const categoria = await this.categoriaRepo.findOneBy({ id: dto.categoriaId });
       if (!categoria) throw new NotFoundException('Categoría no encontrada');
       producto.categoria = categoria;
     }
 
-    // Actualizamos los campos (fusionamos lo viejo con lo nuevo)
+
     Object.assign(producto, dto);
     
     return await this.productoRepo.save(producto);
   }
 
-  // 5. DELETE: Borrar de la base de datos
+  //Borrar de la base de datos
   async remove(id: number) {
     const producto = await this.findOne(id);
     return await this.productoRepo.remove(producto);

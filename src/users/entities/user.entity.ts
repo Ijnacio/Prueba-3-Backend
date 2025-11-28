@@ -8,7 +8,6 @@ export class User extends AbstractEntity {
   @Column()
   name: string;
 
-  // NUEVO CAMPO RUT (Único para que no se repita)
   @Column({ unique: true })
   rut: string; 
 

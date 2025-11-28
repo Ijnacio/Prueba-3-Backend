@@ -32,11 +32,9 @@ export class UsersService {
     return await this.usersRepository.find();
   }
 
-  // --- AQUÍ ESTÁ EL ARREGLO ---
   async findOneByRut(rut: string) {
     return await this.usersRepository.findOne({
       where: { rut },
-      // Forzamos que traiga la password para poder comparar en el login
       select: ['id', 'name', 'rut', 'password', 'rol', 'createdAt', 'updatedAt'], 
     });
   }

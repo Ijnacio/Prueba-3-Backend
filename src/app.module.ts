@@ -33,6 +33,8 @@ import { CategoriasModule } from './categorias/categorias.module';
     ProductosModule,
 
     VentasModule,
+    
+    // SeedModule,
   ],
 })
 export class AppModule {}

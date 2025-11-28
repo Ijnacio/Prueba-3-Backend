@@ -6,27 +6,34 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants } from './constants/jwt.constant'; 
+import { jwtConstants } from './constants/jwt.constant';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-
+    
     if (!token) {
-      throw new UnauthorizedException('Token no proporcionado');
+      throw new UnauthorizedException();
     }
-
+    
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
-      request['user'] = payload;
-    } catch (error) {
-      throw new UnauthorizedException('Token inválido o expirado');
+      
+      // El token trae 'sub', pero nuestro código usa 'id'.
+      // Lo arreglamos asignando 'id' igual a 'sub'.
+      request['user'] = { 
+        ...payload, 
+        id: payload.sub 
+      };
+      
+    } catch {
+      throw new UnauthorizedException();
     }
     return true;
   }

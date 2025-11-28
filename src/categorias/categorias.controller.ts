@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { CategoriasService } from './categorias.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
@@ -12,7 +12,8 @@ export class CategoriasController {
 
   @Get()
   @ApiOperation({ summary: 'Listar categorías' })
-  findAll() {
+  @ApiResponse({ status: 200, description: 'Lista de categorías disponibles.' })
+  findAll(){
     return this.categoriasService.findAll();
   }
 
@@ -27,8 +28,8 @@ export class CategoriasController {
   @UseGuards(AuthGuard)
   @Post()
   @ApiOperation({ summary: 'Crear categoría (Solo Admin)' })
+  @ApiResponse({ status: 201, description: 'Categoría creada.' })
   create(@Body() createCategoriaDto: CreateCategoriaDto, @Request() req) {
-    // Validación Manual de Rol
     if (req.user.rol !== 'admin') {
       throw new UnauthorizedException('No tienes permisos de Administrador');
     }

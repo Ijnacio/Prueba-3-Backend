@@ -28,8 +28,8 @@ export class Boleta extends AbstractEntity {
 
   // --- TRAZABILIDAD ---
   @ManyToOne(() => User, (user) => user.ventas)
-  vendedor: User; // Quién hizo la venta
-
+  vendedor: User;
+  
   @OneToMany(() => DetalleBoleta, (detalle) => detalle.boleta, { cascade: true })
   detalles: DetalleBoleta[];
 }

@@ -3,14 +3,14 @@ import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FiltroVentasDto {
-  @ApiPropertyOptional({ description: 'Filtrar por fecha (YYYY-MM-DD)', example: '2025-11-28' })
+  @ApiPropertyOptional({ description: 'Filtrar por fecha (YYYY-MM-DD)' }) 
   @IsOptional()
   @IsString()
   fecha?: string;
 
-  @ApiPropertyOptional({ description: 'Filtrar por ID de vendedor (Solo Admin)', example: 1 })
+  @ApiPropertyOptional({ description: 'Filtrar por ID de vendedor (Solo Admin)' })
   @IsOptional()
-  @Type(() => Number) // Convierte el string de la URL a número
+  @Type(() => Number)
   @IsInt()
   vendedorId?: number;
 }

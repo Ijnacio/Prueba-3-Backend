@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { MedioPago } from '../enum/medio-pago.enum';
 
-// 1. DTO Auxiliar: Qué datos tiene CADA producto del carrito
 class DetalleVentaItemDto {
   @ApiProperty({ example: 1, description: 'ID del producto a vender' })
   @IsInt()
@@ -16,7 +15,6 @@ class DetalleVentaItemDto {
   cantidad: number;
 }
 
-// 2. DTO Principal: La Venta completa
 export class CreateVentaDto {
   @ApiProperty({ 
     type: [DetalleVentaItemDto], 
