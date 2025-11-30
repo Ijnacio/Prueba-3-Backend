@@ -12,11 +12,11 @@ export class DetalleBoleta extends AbstractEntity {
   precioUnitario: number; 
   
   @Column('int')
-  subtotal: number; // cantidad * precio
+  subtotal: number;
 
-  @ManyToOne(() => Boleta, (boleta) => boleta.detalles)
+  @ManyToOne(() => Boleta, (boleta) => boleta.detalles, { onDelete: 'CASCADE' })
   boleta: Boleta;
 
-  @ManyToOne(() => Producto)
+  @ManyToOne(() => Producto, { onDelete: 'SET NULL', nullable: true })
   producto: Producto;
 }

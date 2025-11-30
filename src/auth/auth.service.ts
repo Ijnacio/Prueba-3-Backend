@@ -15,32 +15,39 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async login({ rut, password }: LoginDto) {
+    // 1. Buscamos el usuario Y su contraseña (que normalmente está oculta)
+    const user = await this.usersService.findByRutWithPassword(rut);
 
-  async login({ rut, password }: LoginDto) { // Recibe RUT
-    const user = await this.usersService.findOneByRut(rut);
-
+    // 2. Si no existe o está inactivo, error genérico por seguridad
     if (!user) {
-      throw new UnauthorizedException('RUT no encontrado');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // 3. Comparamos la contraseña plana con el hash de la BD
     const isPasswordValid = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Contraseña incorrecta');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // 4. Creamos el payload del Token
     const payload = { 
-      sub: user.id, // ID del usuario
-      rut: user.rut, // Guardamos el RUT en el token
-      rol: user.rol // Guardamos el Rol (importante para permisos)
+      sub: user.id, 
+      rut: user.rut, 
+      rol: user.rol,
+      name: user.name 
     };
 
+    // 5. Firmamos el token
     const token = await this.jwtService.signAsync(payload);
 
+    // 6. Retornamos todo lo que el Frontend necesita
     return {
       access_token: token,
       rut: user.rut,
-      rol: user.rol
+      rol: user.rol,
+      name: user.name
     };
   }
 }

@@ -5,6 +5,7 @@ import { Producto } from './entities/producto.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { Categoria } from '../categorias/entities/categoria.entity';
+import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 
 @Injectable()
 export class ProductosService {
@@ -62,8 +63,16 @@ export class ProductosService {
   }
 
   //Borrar de la base de datos
-  async remove(id: number) {
+ async remove(id: number) {
     const producto = await this.findOne(id);
-    return await this.productoRepo.remove(producto);
+    try {
+      return await this.productoRepo.remove(producto);
+    } catch (error) {
+      // Capturamos si el producto está en una 'detalle_boleta'
+      if (error.errno === 1451 || error.code === '23503') {
+        throw new ConflictException('No se puede eliminar: El producto tiene ventas registradas en el historial.');
+      }
+      throw new InternalServerErrorException('Error inesperado al eliminar producto');
+    }
   }
 }

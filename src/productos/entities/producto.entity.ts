@@ -16,6 +16,6 @@ export class Producto extends AbstractEntity {
   @Column({ type: 'text', nullable: true })
   fotoUrl: string; // URL de la imagen (Web o Local)
 
-  @ManyToOne(() => Categoria, (categoria) => categoria.productos)
+  @ManyToOne(() => Categoria, (categoria) => categoria.productos, { onDelete: 'SET NULL', nullable: true })
   categoria: Categoria;
 }

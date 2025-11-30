@@ -9,13 +9,16 @@ export class User extends AbstractEntity {
   name: string;
 
   @Column({ unique: true })
-  rut: string; 
+  rut: string;
 
-  @Column({ select: false })
+  @Column() // Si usaste { select: false }, asegúrate de que tu auth service lo maneje
   password: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.VENDEDOR })
   rol: UserRole;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @OneToMany(() => Boleta, (boleta) => boleta.vendedor)
   ventas: Boleta[];

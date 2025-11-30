@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Categoria } from './entities/categoria.entity';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
-
+import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 @Injectable()
 export class CategoriasService {
   constructor(
@@ -34,6 +34,16 @@ export class CategoriasService {
 
   async remove(id: number) {
     const categoria = await this.findOne(id);
-    return await this.categoriaRepo.remove(categoria);
+    try {
+      return await this.categoriaRepo.remove(categoria);
+    } catch (error) {
+      // Si el error es por llave foránea (tiene hijos), lanzamos un error amigable (409)
+      if (error.errno === 1451 || error.code === '23503') {
+        throw new ConflictException('No se puede eliminar la categoría porque tiene productos asociados.');
+      }
+      // Cualquier otro error es un 500
+      throw new InternalServerErrorException('Error inesperado al eliminar la categoría');
+    }
   }
+
 }

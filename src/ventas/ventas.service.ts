@@ -231,14 +231,22 @@ export class VentasService {
     if (filtros.vendedorId) {
       query.andWhere('vendedor.id = :vendedorId', { vendedorId: filtros.vendedorId });
     }
-    if (filtros.fecha) {
+
+    // --- NUEVA LÓGICA DE FECHAS ---
+    if (filtros.startDate && filtros.endDate) {
+      // Forzamos el rango completo del día
+      query.andWhere('boleta.created_at >= :inicio', { inicio: `${filtros.startDate} 00:00:00` });
+      query.andWhere('boleta.created_at <= :fin', { fin: `${filtros.endDate} 23:59:59` });
+    } 
+    else if (filtros.fecha) {
+      // Fallback antiguo
       query.andWhere('DATE(boleta.created_at) = :fecha', { fecha: filtros.fecha });
     }
+    // ------------------------------
 
     const resultados = await query.getMany();
     return resultados.map(v => this.transformarBoleta(v));
   }
-
   //CAJA GLOBAL
   async resumenDelDia() {
     const hoyInicio = new Date();
