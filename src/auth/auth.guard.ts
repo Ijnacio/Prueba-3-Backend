@@ -25,8 +25,6 @@ export class AuthGuard implements CanActivate {
         secret: jwtConstants.secret,
       });
       
-      // El token trae 'sub', pero nuestro código usa 'id'.
-      // Lo arreglamos asignando 'id' igual a 'sub'.
       request['user'] = { 
         ...payload, 
         id: payload.sub 

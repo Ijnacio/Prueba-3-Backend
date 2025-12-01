@@ -14,7 +14,7 @@ describe('AuthService (Seguridad)', () => {
   };
 
   const mockUsersService = {
-    findOneByRut: jest.fn(),
+    findByRutWithPassword: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -27,33 +27,28 @@ describe('AuthService (Seguridad)', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    mockUsersService.findOneByRut.mockClear();
   });
 
   it('ESCENARIO: Login Exitoso (Debe entregar token)', async () => {
-    // Simulamos usuario en BD con contraseña encriptada
     const passwordReal = '123456';
     const hashEnBD = await bcryptjs.hash(passwordReal, 10);
     
-    mockUsersService.findOneByRut.mockResolvedValue({
-      id: 1, rut: '1-9', password: hashEnBD, rol: 'admin'
+    mockUsersService.findByRutWithPassword.mockResolvedValue({
+      id: 1, rut: '1-9', password: hashEnBD, rol: 'admin', name: 'Admin'
     });
 
     const resultado = await service.login({ rut: '1-9', password: passwordReal });
 
-    // Verificamos que devuelva el token
     expect(resultado.access_token).toBe('token_seguro_123');
   });
 
   it('ESCENARIO: Contraseña Incorrecta (Debe bloquear acceso)', async () => {
-    // Usuario existe, pero la contraseña no coincide
     const hashEnBD = await bcryptjs.hash('contraseña_correcta', 10);
     
-    mockUsersService.findOneByRut.mockResolvedValue({
+    mockUsersService.findByRutWithPassword.mockResolvedValue({
       id: 1, rut: '1-9', password: hashEnBD
     });
 
-    // Intentamos entrar con clave mala
     await expect(service.login({ rut: '1-9', password: 'clave_mala' }))
       .rejects.toThrow(UnauthorizedException);
   });

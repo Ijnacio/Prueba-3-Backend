@@ -14,28 +14,24 @@ export class ProductosService {
     @InjectRepository(Categoria) private readonly categoriaRepo: Repository<Categoria>,
   ) {}
 
-  //Crear producto validando categoría
   async create(dto: CreateProductoDto) {
-    // Verificamos que la categoría exista
     const categoria = await this.categoriaRepo.findOneBy({ id: dto.categoriaId });
     if (!categoria) throw new NotFoundException('Categoría no encontrada');
 
     const producto = this.productoRepo.create({
       ...dto,
-      categoria, 
+      categoria,
     });
     
     return await this.productoRepo.save(producto);
   }
 
-  //Listar todos (con su categoría visible)
   async findAll() {
     return await this.productoRepo.find({
-      relations: ['categoria'], // Truco para que te traiga el nombre de la categoría
+      relations: ['categoria'],
     });
   }
 
-  //Buscar uno solo por ID
   async findOne(id: number) {
     const producto = await this.productoRepo.findOne({
       where: { id },
@@ -45,10 +41,8 @@ export class ProductosService {
     return producto;
   }
 
-  // 4.Editar datos
   async update(id: number, dto: UpdateProductoDto) {
-    const producto = await this.findOne(id); 
-    
+    const producto = await this.findOne(id);
 
     if (dto.categoriaId) {
       const categoria = await this.categoriaRepo.findOneBy({ id: dto.categoriaId });
@@ -56,19 +50,15 @@ export class ProductosService {
       producto.categoria = categoria;
     }
 
-
     Object.assign(producto, dto);
     
     return await this.productoRepo.save(producto);
   }
-
-  //Borrar de la base de datos
  async remove(id: number) {
     const producto = await this.findOne(id);
     try {
       return await this.productoRepo.remove(producto);
     } catch (error) {
-      // Capturamos si el producto está en una 'detalle_boleta'
       if (error.errno === 1451 || error.code === '23503') {
         throw new ConflictException('No se puede eliminar: El producto tiene ventas registradas en el historial.');
       }

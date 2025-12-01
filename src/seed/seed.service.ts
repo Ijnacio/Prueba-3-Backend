@@ -28,11 +28,11 @@ export class SeedService {
     await this.crearUsuarios();
     await this.crearCategoriasYProductos();
     await this.crearVentasHistoricas(); 
-    return { message: 'SEED EJECUTADO: Base de datos ordenada cronológicamente 🧹✨' };
+    return { message: 'SEED EJECUTADO: Base de datos lista' };
   }
 
   async limpiarBaseDeDatos() {
-    this.logger.warn('🧹 Iniciando limpieza total...');
+    this.logger.warn('Iniciando limpieza total...');
     try {
       await this.dataSource.query('SET FOREIGN_KEY_CHECKS = 0');
       await this.detalleRepo.query('TRUNCATE TABLE detalle_boletas');
@@ -41,7 +41,7 @@ export class SeedService {
       await this.categoriaRepo.query('TRUNCATE TABLE categorias');
       await this.userRepo.query('TRUNCATE TABLE users');
       await this.dataSource.query('SET FOREIGN_KEY_CHECKS = 1');
-      this.logger.log('✅ Base de datos vaciada');
+      this.logger.log('Base de datos vaciada');
     } catch (error) {
       this.logger.error('Error al limpiar: ' + error.message);
       await this.dataSource.query('SET FOREIGN_KEY_CHECKS = 1');
@@ -55,7 +55,7 @@ export class SeedService {
 
     await this.userRepo.save({ name: 'Administrador Supremo', rut: '1-9', password: passwordAdmin, rol: UserRole.ADMIN });
     await this.userRepo.save({ name: 'Juan Cajero', rut: '2-7', password: passwordVendedor, rol: UserRole.VENDEDOR });
-    this.logger.log('✅ Usuarios creados');
+    this.logger.log('Usuarios creados');
   }
 
   async crearCategoriasYProductos() {
@@ -104,19 +104,16 @@ export class SeedService {
         categoria: categoriasMap[p.category],
       });
     }
-    this.logger.log('✅ Productos creados');
+    this.logger.log('Productos creados');
   }
 
   async crearVentasHistoricas() {
-    this.logger.log('⏳ Creando ventas históricas...');
+    this.logger.log('Creando ventas historicas...');
     const vendedor = await this.userRepo.findOneBy({ rut: '2-7' });
     const productos = await this.productoRepo.find();
 
     if (!vendedor || productos.length === 0) return;
 
-    // --- CORRECCIÓN DE ORDEN ---
-    // Ordenamos de mayor a menor (5 días atrás, 3 días atrás...)
-    // Así la primera iteración crea la venta más antigua (ID 1)
     const diasAtras = [5, 3, 2, 2, 1, 1, 0, 0].sort((a, b) => b - a); 
 
     for (const dias of diasAtras) {
@@ -155,6 +152,6 @@ export class SeedService {
 
       await this.detalleRepo.save(detalle);
     }
-    this.logger.log(`✅ Historial generado: ${diasAtras.length} ventas ordenadas cronológicamente.`);
+    this.logger.log(`Historial generado: ${diasAtras.length} ventas.`);
   }
 }

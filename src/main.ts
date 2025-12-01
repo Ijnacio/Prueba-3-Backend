@@ -37,7 +37,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3006;
   await app.listen(port);
 
-  logger.log(`🚀 Servidor corriendo en: \x1b[32mhttp://localhost:${port}/api/v1\x1b[0m`);
-  logger.log(`📑 Swagger disponible en: \x1b[32mhttp://localhost:${port}/docs\x1b[0m`);
+  logger.log(`Servidor corriendo en: \x1b[32mhttp://localhost:${port}/api/v1\x1b[0m`);
+  logger.log(`Swagger disponible en: \x1b[32mhttp://localhost:${port}/docs\x1b[0m`);
 }
 bootstrap();

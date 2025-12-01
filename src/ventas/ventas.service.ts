@@ -17,7 +17,6 @@ export class VentasService {
     private dataSource: DataSource,
   ) {}
 
-  //1. CREAR VENTA
   async crearVenta(dto: CreateVentaDto, vendedorData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -30,7 +29,6 @@ export class VentasService {
       let totalVenta = 0;
       const detalles: DetalleBoleta[] = [];
 
-      //Procesar Productos
       for (const item of dto.items) {
         const producto = await this.productoRepo.findOneBy({ id: item.productoId });
         if (!producto) throw new BadRequestException(`Producto ID ${item.productoId} no existe`);
@@ -43,7 +41,6 @@ export class VentasService {
         producto.stock -= item.cantidad;
         await queryRunner.manager.save(producto);
 
-        // Crear detalle
         const detalle = new DetalleBoleta();
         detalle.producto = producto;
         detalle.cantidad = item.cantidad;
@@ -54,7 +51,6 @@ export class VentasService {
         totalVenta += detalle.subtotal;
       }
 
-      //Cálculos
       const neto = Math.round(totalVenta / 1.19);
       const iva = totalVenta - neto;
       
@@ -66,7 +62,6 @@ export class VentasService {
         vuelto = dto.montoEntregado - totalVenta;
       }
 
-      //Guardar
       const boleta = new Boleta();
       boleta.vendedor = { id: vendedorId } as User;
       boleta.medioPago = dto.medioPago;
@@ -77,16 +72,12 @@ export class VentasService {
       boleta.vuelto = vuelto;
       boleta.detalles = detalles;
 
-      // Guardamos y obtenemos el ID generado
       const guardada = await queryRunner.manager.save(boleta);
       
-      //Confirmamos la transacción ANTES de consultar
       await queryRunner.commitTransaction();
 
-      //Consultar la boleta completa para mostrar datos bonitos (Nombre vendedor, productos)
       const boletaCompleta = await this.findOne(guardada.id);
       
-      //Formato Ticket
       return this.transformarBoleta(boletaCompleta);
 
     } catch (error) {
@@ -97,7 +88,6 @@ export class VentasService {
     }
   }
 
-  //2. EDITAR VENTA
   async update(id: number, dto: UpdateVentaDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -161,7 +151,6 @@ export class VentasService {
       await queryRunner.manager.save(venta);
       await queryRunner.commitTransaction();
       
-      // Retornar versión limpia
       return this.transformarBoleta(await this.findOne(id));
 
     } catch (error) {
@@ -172,7 +161,6 @@ export class VentasService {
     }
   }
 
- // 3. RESUMEN PERSONAL
   async resumenPersonal(vendedorId: number) {
     if (!vendedorId) throw new BadRequestException("ID de vendedor requerido");
 
@@ -181,7 +169,6 @@ export class VentasService {
     const hoyFin = new Date();
     hoyFin.setHours(23, 59, 59, 999);
 
-    // Consulta segura con QueryBuilder
     const query = this.boletaRepo.createQueryBuilder('boleta')
       .leftJoinAndSelect('boleta.vendedor', 'vendedor')
       .where('vendedor.id = :id', { id: vendedorId })
@@ -190,7 +177,6 @@ export class VentasService {
 
     const misVentasHoy = await query.getMany();
 
-    // Desglose matemático
     const efectivo = misVentasHoy.filter(v => v.medioPago === 'EFECTIVO').reduce((sum, v) => sum + v.total, 0);
     const debito = misVentasHoy.filter(v => v.medioPago === 'DEBITO').reduce((sum, v) => sum + v.total, 0);
     const credito = misVentasHoy.filter(v => v.medioPago === 'CREDITO').reduce((sum, v) => sum + v.total, 0);
@@ -208,7 +194,6 @@ export class VentasService {
     };
   }
 
-  //MIS VENTAS
   async findMySales(vendedorId: number) {
     if (!vendedorId) return [];
     const ventas = await this.boletaRepo.find({
@@ -216,11 +201,9 @@ export class VentasService {
       relations: ['detalles', 'detalles.producto', 'vendedor'],
       order: { createdAt: 'DESC' }
     });
-    // Transformamos cada venta para que se vea limpia en la lista
     return ventas.map(v => this.transformarBoleta(v));
   }
 
-  //HISTORIAL ADMIN
   async findAllAdmin(filtros: FiltroVentasDto) {
     const query = this.boletaRepo.createQueryBuilder('boleta')
       .leftJoinAndSelect('boleta.vendedor', 'vendedor')
@@ -232,22 +215,18 @@ export class VentasService {
       query.andWhere('vendedor.id = :vendedorId', { vendedorId: filtros.vendedorId });
     }
 
-    // --- NUEVA LÓGICA DE FECHAS ---
     if (filtros.startDate && filtros.endDate) {
-      // Forzamos el rango completo del día
       query.andWhere('boleta.created_at >= :inicio', { inicio: `${filtros.startDate} 00:00:00` });
       query.andWhere('boleta.created_at <= :fin', { fin: `${filtros.endDate} 23:59:59` });
     } 
     else if (filtros.fecha) {
-      // Fallback antiguo
       query.andWhere('DATE(boleta.created_at) = :fecha', { fecha: filtros.fecha });
     }
-    // ------------------------------
 
     const resultados = await query.getMany();
     return resultados.map(v => this.transformarBoleta(v));
   }
-  //CAJA GLOBAL
+
   async resumenDelDia() {
     const hoyInicio = new Date();
     hoyInicio.setHours(0, 0, 0, 0);
@@ -271,7 +250,6 @@ export class VentasService {
     };
   }
 
-  //ELIMINAR
   async remove(id: number) {
     const venta = await this.findOne(id);
     const queryRunner = this.dataSource.createQueryRunner();

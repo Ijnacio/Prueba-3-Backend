@@ -29,20 +29,16 @@ describe('UsersService (Gestión Personal)', () => {
   it('ESCENARIO: Crear Vendedor (Debe encriptar contraseña)', async () => {
     const nuevoEmpleado = { name: 'Juan', rut: '9-9', password: 'password123', rol: 'vendedor' } as any;
     
-    // RUT no existe
     mockUserRepo.findOne.mockResolvedValue(null);
 
     const resultado = await service.create(nuevoEmpleado);
 
-    // Verificamos que la contraseña NO se guardó como texto plano
     expect(resultado.password).not.toBe('password123');
-    // Verificamos que sea un hash válido
     const esHashValido = await bcryptjs.compare('password123', resultado.password);
     expect(esHashValido).toBe(true);
   });
 
   it('ESCENARIO: Evitar RUT Duplicado', async () => {
-    // Simulamos que el RUT ya está en la BD
     mockUserRepo.findOne.mockResolvedValue({ id: 1, rut: '9-9' });
 
     await expect(service.create({ rut: '9-9', password: '123' } as any))

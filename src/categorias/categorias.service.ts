@@ -37,11 +37,9 @@ export class CategoriasService {
     try {
       return await this.categoriaRepo.remove(categoria);
     } catch (error) {
-      // Si el error es por llave foránea (tiene hijos), lanzamos un error amigable (409)
       if (error.errno === 1451 || error.code === '23503') {
         throw new ConflictException('No se puede eliminar la categoría porque tiene productos asociados.');
       }
-      // Cualquier otro error es un 500
       throw new InternalServerErrorException('Error inesperado al eliminar la categoría');
     }
   }
