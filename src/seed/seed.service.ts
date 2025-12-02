@@ -140,7 +140,7 @@ export class SeedService {
 
     if (!vendedor || productos.length === 0) return;
 
-    const diasAtras = [5, 4, 3, 2, 1, 1, 0, 0, 0];
+    const diasAtras = [3, 3, 2, 2, 1, 1, 0, 0, 0];
 
     for (const dias of diasAtras) {
       const fechaVenta = new Date();
